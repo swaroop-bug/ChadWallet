@@ -51,9 +51,15 @@ export default function LandingPage() {
 
   const getWalletDisplay = () => {
     const u = user as any;
-    if (!u || !u.wallet) return "";
-    const addr = u.wallet.address;
-    return `${addr.substring(0, 4)}...${addr.substring(addr.length - 4)}`;
+    if (!u) return "";
+    if (u.wallet?.address) {
+      const addr = u.wallet.address;
+      return `${addr.substring(0, 4)}...${addr.substring(addr.length - 4)}`;
+    }
+    if (u.email?.address) return u.email.address;
+    if (u.google?.email) return u.google.email;
+    if (u.apple?.email) return u.apple.email;
+    return "Connected";
   };
 
   const renderChange = (change: number) => {
@@ -138,7 +144,7 @@ export default function LandingPage() {
             Terminal
           </Link>
           
-          {ready && authenticated && (user as any)?.wallet ? (
+          {ready && authenticated ? (
             <div className="flex items-center gap-3">
               <Link 
                 href="/trade" 
@@ -275,6 +281,8 @@ export default function LandingPage() {
                   src="/assets/video/chadwallet.mp4" 
                   controls 
                   autoPlay 
+                  playsInline
+                  muted
                   className="w-full h-full object-cover"
                 />
               ) : (

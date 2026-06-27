@@ -132,9 +132,15 @@ function TradeWorkspace() {
 
   const getWalletDisplay = () => {
     const u = user as any;
-    if (!u || !u.wallet) return "";
-    const addr = u.wallet.address;
-    return `${addr.substring(0, 4)}...${addr.substring(addr.length - 4)}`;
+    if (!u) return "";
+    if (u.wallet?.address) {
+      const addr = u.wallet.address;
+      return `${addr.substring(0, 4)}...${addr.substring(addr.length - 4)}`;
+    }
+    if (u.email?.address) return u.email.address;
+    if (u.google?.email) return u.google.email;
+    if (u.apple?.email) return u.apple.email;
+    return "Connected";
   };
 
   const activeTokenBalance = activeToken ? (positions[activeToken.address]?.amount || 0) : 0;

@@ -73,82 +73,133 @@ function getMockChadToken(): TokenData {
 
 export async function fetchTokens(): Promise<TokenData[]> {
   try {
-    const addresses = DEFAULT_TOKENS_LIST.filter(addr => addr !== DEFAULT_TOKENS.CHAD).join(",");
-    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${addresses}`);
-    if (!res.ok) throw new Error();
-    
-    const data = await res.json();
-    const dexscreenerTokens: TokenData[] = (data.pairs || [])
-      .filter((p: any) => p.chainId === "solana" && (p.dexId === "raydium" || p.dexId === "meteora" || p.dexId === "orca"))
-      .reduce((acc: TokenData[], pair: any) => {
-        const tokenAddress = pair.baseToken.address;
-        const existing = acc.find(t => t.address === tokenAddress);
-        
-        const tokenItem: TokenData = {
-          address: tokenAddress,
-          name: pair.baseToken.name,
-          symbol: pair.baseToken.symbol,
-          priceUsd: parseFloat(pair.priceUsd) || 0,
-          priceChange24h: parseFloat(pair.priceChange.h24) || 0,
-          volume24h: parseFloat(pair.volume.h24) || 0,
-          liquidity: parseFloat(pair.liquidity?.usd) || 0,
-          fdv: parseFloat(pair.fdv) || 0,
-          iconUrl: pair.info?.imageUrl,
-          pairUrl: pair.url,
-        };
-
-        if (!existing) {
-          acc.push(tokenItem);
-        } else if (tokenItem.liquidity > existing.liquidity) {
-          const idx = acc.findIndex(t => t.address === tokenAddress);
-          acc[idx] = tokenItem;
-        }
-        return acc;
-      }, []);
-
-    const finalTokens = [getMockChadToken(), ...dexscreenerTokens];
-    
-    DEFAULT_TOKENS_LIST.forEach(addr => {
-      const exists = finalTokens.some(t => t.address.toLowerCase() === addr.toLowerCase());
-      if (!exists) {
-        const metadata = MOCK_TOKEN_METADATA[addr];
-        if (metadata) {
-          finalTokens.push({
-            address: addr,
-            name: metadata.name || "Unknown",
-            symbol: metadata.symbol || "UNKNOWN",
-            priceUsd: metadata.priceUsd || 0,
-            priceChange24h: metadata.priceChange24h || 0,
-            volume24h: 1500000,
-            liquidity: 500000,
-            fdv: 10000000,
-            iconUrl: metadata.iconUrl,
-          });
-        }
-      }
-    });
-
-    return finalTokens;
-  } catch {
-    return Object.entries(DEFAULT_TOKENS).map(([symbol, address]) => {
-      const meta = MOCK_TOKEN_METADATA[address];
+    const addressesToFetch = DEFAULT_TOKENS_LIST.filter(addr => addr !== DEFAULT_TOKENS.CHAD);
+    const promises = addressesToFetch.map(async (address) => {
+      const res = await fetch(`/api/birdeye?endpoint=defi/token_overview&address=${address}`);
+      if (!res.ok) throw new Error("Birdeye fetch failed");
+      const body = await res.json();
+      if (!body.success || !body.data) throw new Error("Birdeye returned success=false");
+      const item = body.data;
       return {
         address,
-        name: meta?.name || symbol,
-        symbol,
-        priceUsd: meta?.priceUsd || 1.0,
-        priceChange24h: meta?.priceChange24h || 0,
-        volume24h: symbol === "CHAD" ? 24500000 : 8500000,
-        liquidity: 1200000,
-        fdv: 85000000,
-        iconUrl: meta?.iconUrl,
+        name: item.name || item.symbol || "Unknown",
+        symbol: item.symbol || "UNKNOWN",
+        priceUsd: parseFloat(item.price) || 0,
+        priceChange24h: parseFloat(item.priceChange24hPercent || item.priceChange24h || 0),
+        volume24h: parseFloat(item.v24hUSD || item.v24h || item.volume24hUSD || 0),
+        liquidity: parseFloat(item.liquidity || 0),
+        fdv: parseFloat(item.mc || 0),
+        iconUrl: item.logoURI || item.extensions?.logoURI || undefined,
       };
     });
+
+    const birdeyeTokens = await Promise.all(promises);
+    return [getMockChadToken(), ...birdeyeTokens];
+  } catch (error) {
+    try {
+      const addresses = DEFAULT_TOKENS_LIST.filter(addr => addr !== DEFAULT_TOKENS.CHAD).join(",");
+      const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${addresses}`);
+      if (!res.ok) throw new Error();
+      
+      const data = await res.json();
+      const dexscreenerTokens: TokenData[] = (data.pairs || [])
+        .filter((p: any) => p.chainId === "solana" && (p.dexId === "raydium" || p.dexId === "meteora" || p.dexId === "orca"))
+        .reduce((acc: TokenData[], pair: any) => {
+          const tokenAddress = pair.baseToken.address;
+          const existing = acc.find(t => t.address === tokenAddress);
+          
+          const tokenItem: TokenData = {
+            address: tokenAddress,
+            name: pair.baseToken.name,
+            symbol: pair.baseToken.symbol,
+            priceUsd: parseFloat(pair.priceUsd) || 0,
+            priceChange24h: parseFloat(pair.priceChange.h24) || 0,
+            volume24h: parseFloat(pair.volume.h24) || 0,
+            liquidity: parseFloat(pair.liquidity?.usd) || 0,
+            fdv: parseFloat(pair.fdv) || 0,
+            iconUrl: pair.info?.imageUrl,
+            pairUrl: pair.url,
+          };
+
+          if (!existing) {
+            acc.push(tokenItem);
+          } else if (tokenItem.liquidity > existing.liquidity) {
+            const idx = acc.findIndex(t => t.address === tokenAddress);
+            acc[idx] = tokenItem;
+          }
+          return acc;
+        }, []);
+
+      const finalTokens = [getMockChadToken(), ...dexscreenerTokens];
+      
+      DEFAULT_TOKENS_LIST.forEach(addr => {
+        const exists = finalTokens.some(t => t.address.toLowerCase() === addr.toLowerCase());
+        if (!exists) {
+          const metadata = MOCK_TOKEN_METADATA[addr];
+          if (metadata) {
+            finalTokens.push({
+              address: addr,
+              name: metadata.name || "Unknown",
+              symbol: metadata.symbol || "UNKNOWN",
+              priceUsd: metadata.priceUsd || 0,
+              priceChange24h: metadata.priceChange24h || 0,
+              volume24h: 1500000,
+              liquidity: 500000,
+              fdv: 10000000,
+              iconUrl: metadata.iconUrl,
+            });
+          }
+        }
+      });
+
+      return finalTokens;
+    } catch {
+      return Object.entries(DEFAULT_TOKENS).map(([symbol, address]) => {
+        const meta = MOCK_TOKEN_METADATA[address];
+        return {
+          address,
+          name: meta?.name || symbol,
+          symbol,
+          priceUsd: meta?.priceUsd || 1.0,
+          priceChange24h: meta?.priceChange24h || 0,
+          volume24h: symbol === "CHAD" ? 24500000 : 8500000,
+          liquidity: 1200000,
+          fdv: 85000000,
+          iconUrl: meta?.iconUrl,
+        };
+      });
+    }
   }
 }
 
 export async function searchTokens(query: string): Promise<TokenData[]> {
   if (!query) return fetchTokens();
+
+  if (query.length >= 32 && query.length <= 44) {
+    try {
+      const res = await fetch(`/api/birdeye?endpoint=defi/token_overview&address=${query}`);
+      if (res.ok) {
+        const body = await res.json();
+        if (body.success && body.data) {
+          const item = body.data;
+          return [{
+            address: query,
+            name: item.name || item.symbol || "Unknown",
+            symbol: item.symbol || "UNKNOWN",
+            priceUsd: parseFloat(item.price) || 0,
+            priceChange24h: parseFloat(item.priceChange24hPercent || item.priceChange24h || 0),
+            volume24h: parseFloat(item.v24hUSD || item.v24h || item.volume24hUSD || 0),
+            liquidity: parseFloat(item.liquidity || 0),
+            fdv: parseFloat(item.mc || 0),
+            iconUrl: item.logoURI || item.extensions?.logoURI || undefined,
+          }];
+        }
+      }
+    } catch {
+      // ignore and continue
+    }
+  }
+
   try {
     const res = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`);
     if (!res.ok) throw new Error();

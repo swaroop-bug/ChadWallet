@@ -110,6 +110,10 @@ body {
   white-space: nowrap;
 }
 
+.ticker-container:hover {
+  animation-play-state: paused;
+}
+
 /* Custom glow backgrounds */
 .glow-spot {
   position: absolute;

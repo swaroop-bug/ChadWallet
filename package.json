@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@privy-io/react-auth": "^3.32.2",
+    "@solana-program/memo": "^0.11.2",
     "@solana/web3.js": "^1.98.4",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.40.0",

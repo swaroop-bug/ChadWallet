@@ -16,6 +16,7 @@ export default function PrivyWrapper({ children }: { children: React.ReactNode }
           showWalletLoginFirst: false,
           logo: "/assets/logo/light.png",
           walletList: ["phantom", "solflare"],
+          walletChainType: "solana-only",
         },
         loginMethods: ["google", "apple", "email", "wallet"],
       }}
