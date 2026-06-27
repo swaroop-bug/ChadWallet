@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import PrivyWrapper from "@/components/PrivyProvider";
+import ChadAuthProvider from "@/components/ChadAuthProvider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-col font-sans bg-[#06070a] text-gray-100 selection:bg-brand-primary selection:text-white">
-        <PrivyWrapper>
+        <ChadAuthProvider>
           <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
             <div className="glow-spot top-[-100px] left-[-50px] opacity-70"></div>
             <div className="glow-spot top-[500px] right-[-100px] opacity-40"></div>
@@ -39,7 +39,7 @@ export default function RootLayout({
               {children}
             </main>
           </div>
-        </PrivyWrapper>
+        </ChadAuthProvider>
       </body>
     </html>
   );
