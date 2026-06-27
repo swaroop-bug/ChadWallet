@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
+import ChadAuthProvider from "./ChadAuthProvider";
 
 export default function PrivyWrapper({ children }: { children: React.ReactNode }) {
   const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cm670v68200f40d12e8x51d8b";
@@ -21,7 +22,9 @@ export default function PrivyWrapper({ children }: { children: React.ReactNode }
         loginMethods: ["google", "apple", "email", "wallet"],
       }}
     >
-      {children}
+      <ChadAuthProvider>
+        {children}
+      </ChadAuthProvider>
     </PrivyProvider>
   );
 }

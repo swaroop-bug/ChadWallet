@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
+import { useChadAuth } from "@/components/ChadAuthProvider";
 import { 
   fetchTokens, 
   TokenData 
@@ -27,7 +27,7 @@ import {
 
 export default function LandingPage() {
   const router = useRouter();
-  const { login, logout, authenticated, ready, user } = usePrivy();
+  const { login, logout, authenticated, ready, user } = useChadAuth();
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);

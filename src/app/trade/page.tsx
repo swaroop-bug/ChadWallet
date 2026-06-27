@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
+import { useChadAuth } from "@/components/ChadAuthProvider";
 import { fetchTokens, searchTokens, TokenData, DEFAULT_TOKENS } from "@/services/tokens";
 import TrendingList from "@/components/trade/TrendingList";
 import TokenDetails from "@/components/trade/TokenDetails";
@@ -21,7 +21,7 @@ interface Position {
 
 function TradeWorkspace() {
   const searchParams = useSearchParams();
-  const { login, authenticated, ready, user } = usePrivy();
+  const { login, authenticated, ready, user } = useChadAuth();
   
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [activeToken, setActiveToken] = useState<TokenData | null>(null);

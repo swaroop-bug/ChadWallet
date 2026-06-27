@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { TokenData } from "@/services/tokens";
 import { fetchJupiterQuote, SwapQuote } from "@/services/jupiter";
-import { usePrivy } from "@privy-io/react-auth";
+import { useChadAuth } from "@/components/ChadAuthProvider";
 import { ArrowUpDown, RefreshCw, Wallet, Flame, ArrowUpRight, TrendingUp, TrendingDown } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -28,7 +28,7 @@ export default function SwapWidget({
   position,
   onSwapSuccess
 }: SwapWidgetProps) {
-  const { login, authenticated } = usePrivy();
+  const { login, authenticated } = useChadAuth();
   const [tab, setTab] = useState<"buy" | "sell">("buy");
   const [inputAmount, setInputAmount] = useState("");
   const [outputAmount, setOutputAmount] = useState("");
