@@ -4,7 +4,7 @@ import React from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
 
 export default function PrivyWrapper({ children }: { children: React.ReactNode }) {
-  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "clw1234560000000000000000";
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cm670v68200f40d12e8x51d8b";
 
   return (
     <PrivyProvider

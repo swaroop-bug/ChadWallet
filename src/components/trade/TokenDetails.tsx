@@ -201,7 +201,7 @@ export default function TokenDetails({ token }: TokenDetailsProps) {
           </div>
         ) : (
           <iframe 
-            src={`https://dexscreener.com/solana/${token.address}?embed=1&theme=dark&trades=0&info=0`}
+            src={`https://birdeye.so/tv-widget/${token.address}?chain=solana&viewMode=pair&chartInterval=15&chartType=candle&chartTheme=dark`}
             title={`${token.symbol} Price Chart`}
             className="w-full h-full border-none opacity-90"
             allow="clipboard-write"
